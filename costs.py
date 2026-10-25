@@ -89,17 +89,55 @@ def sweep(scores, is_rotten, cost_fn: float = COST_FN, base_rate: float = BASE_R
                      for t in THRESHOLDS])
 
 
+# A threshold is only trusted if the cost stays low when it is nudged: on ~700
+# test fruits the literal minimum can hinge on a single fruit (here a mislabelled
+# banana with rot score 0.004). Each candidate is judged by the worst cost
+# within +/- ROBUST_WINDOW of it, and ties go to the middle of the tied range.
+ROBUST_WINDOW = 0.05
+
+
+def _neighbours(i: int) -> np.ndarray:
+    return np.where(np.abs(THRESHOLDS - THRESHOLDS[i]) <= ROBUST_WINDOW + 1e-9)[0]
+
+
+def _middle_of(indices: np.ndarray) -> int:
+    midpoint = (THRESHOLDS[indices].min() + THRESHOLDS[indices].max()) / 2
+    return int(indices[np.argmin(np.abs(THRESHOLDS[indices] - midpoint))])
+
+
+def robust_threshold(costs_by_threshold: np.ndarray) -> dict:
+    """Threshold with the lowest worst-case cost in its neighbourhood."""
+    worst = np.array([costs_by_threshold[_neighbours(i)].max() for i in range(len(THRESHOLDS))])
+    tied = np.where(np.isclose(worst, worst.min()))[0]
+    i = _middle_of(tied)
+    return {"threshold": float(THRESHOLDS[i]), "cost_per_1000": float(costs_by_threshold[i]),
+            "worst_cost_in_window": float(worst[i]), "window": ROBUST_WINDOW,
+            "tied_range": [float(THRESHOLDS[tied].min()), float(THRESHOLDS[tied].max())],
+            "literal_minimum": float(THRESHOLDS[np.argmin(costs_by_threshold)]),
+            "literal_minimum_cost": float(costs_by_threshold.min())}
+
+
 def best_band(scores, is_rotten, max_review_share: float = 1.0) -> dict:
-    """Cheapest (t_low, t_high) whose review share stays within the cap."""
-    best = None
-    for i, t_low in enumerate(THRESHOLDS):
-        for t_high in THRESHOLDS[i:]:
-            rates = outcome_rates(scores, is_rotten, t_low, t_high)
-            share = review_share(rates)
-            if share > max_review_share + 1e-12:
-                continue
-            cost = cost_per_1000(rates)
-            if best is None or cost < best["cost_per_1000"] - 1e-12:
-                best = {"t_low": float(t_low), "t_high": float(t_high),
-                        "cost_per_1000": cost, "review_share": share}
-    return best
+    """(t_low, t_high) with the lowest worst-case cost when both edges are nudged,
+    among bands whose review share stays within the cap."""
+    n = len(THRESHOLDS)
+    cost = np.full((n, n), np.inf)
+    share = np.full((n, n), np.inf)
+    for i in range(n):
+        for j in range(n):
+            rates = outcome_rates(scores, is_rotten, min(THRESHOLDS[i], THRESHOLDS[j]),
+                                  max(THRESHOLDS[i], THRESHOLDS[j]))
+            cost[i, j], share[i, j] = cost_per_1000(rates), review_share(rates)
+    neighbours = [_neighbours(i) for i in range(n)]
+    worst = np.full((n, n), np.inf)
+    for i in range(n):
+        for j in range(i, n):
+            if share[i, j] <= max_review_share + 1e-12:
+                worst[i, j] = cost[np.ix_(neighbours[i], neighbours[j])].max()
+    tied = np.argwhere(np.isclose(worst, worst.min()))
+    # Among ties, the band that sends fewest fruit to a person, then the middle one.
+    fewest = tied[np.isclose(share[tied[:, 0], tied[:, 1]], share[tied[:, 0], tied[:, 1]].min())]
+    i, j = fewest[len(fewest) // 2]
+    return {"t_low": float(THRESHOLDS[i]), "t_high": float(THRESHOLDS[j]),
+            "cost_per_1000": float(cost[i, j]), "worst_cost_in_window": float(worst[i, j]),
+            "review_share": float(share[i, j])}

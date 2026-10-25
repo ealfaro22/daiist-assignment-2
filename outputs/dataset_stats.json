@@ -1,0 +1,184 @@
+{
+  "source": "deep-learning-computer-vision-project/rotten-fruit-detector/3",
+  "classes": [
+    "bad apple",
+    "bad banana",
+    "bad orange",
+    "good apple",
+    "good banana",
+    "good orange"
+  ],
+  "splits": {
+    "train": {
+      "images": 2316,
+      "empty_images": 0,
+      "mean_boxes_per_image": 2.3,
+      "instances": {
+        "bad apple": 641,
+        "bad banana": 726,
+        "bad orange": 992,
+        "good apple": 604,
+        "good banana": 1237,
+        "good orange": 1122
+      },
+      "images_with_class": {
+        "bad apple": 421,
+        "bad banana": 423,
+        "bad orange": 431,
+        "good apple": 427,
+        "good banana": 414,
+        "good orange": 420
+      },
+      "median_box_area": {
+        "bad apple": 0.1268,
+        "bad banana": 0.1896,
+        "bad orange": 0.1085,
+        "good apple": 0.1276,
+        "good banana": 0.2137,
+        "good orange": 0.0614
+      },
+      "size_buckets": {
+        "bad apple": {
+          "medium": 276,
+          "large": 365
+        },
+        "bad banana": {
+          "medium": 135,
+          "large": 591
+        },
+        "bad orange": {
+          "medium": 438,
+          "small": 12,
+          "large": 542
+        },
+        "good apple": {
+          "large": 335,
+          "medium": 269
+        },
+        "good banana": {
+          "large": 1009,
+          "medium": 228
+        },
+        "good orange": {
+          "medium": 719,
+          "small": 15,
+          "large": 388
+        }
+      }
+    },
+    "valid": {
+      "images": 658,
+      "empty_images": 0,
+      "mean_boxes_per_image": 2.25,
+      "instances": {
+        "bad apple": 160,
+        "bad banana": 182,
+        "bad orange": 295,
+        "good apple": 150,
+        "good banana": 337,
+        "good orange": 356
+      },
+      "images_with_class": {
+        "bad apple": 116,
+        "bad banana": 114,
+        "bad orange": 117,
+        "good apple": 118,
+        "good banana": 127,
+        "good orange": 120
+      },
+      "median_box_area": {
+        "bad apple": 0.235,
+        "bad banana": 0.1992,
+        "bad orange": 0.1165,
+        "good apple": 0.1846,
+        "good banana": 0.2269,
+        "good orange": 0.0752
+      },
+      "size_buckets": {
+        "bad apple": {
+          "medium": 62,
+          "large": 98
+        },
+        "bad banana": {
+          "large": 152,
+          "medium": 30
+        },
+        "bad orange": {
+          "medium": 118,
+          "small": 10,
+          "large": 167
+        },
+        "good apple": {
+          "large": 101,
+          "medium": 49
+        },
+        "good banana": {
+          "large": 286,
+          "medium": 51
+        },
+        "good orange": {
+          "medium": 214,
+          "small": 7,
+          "large": 135
+        }
+      }
+    },
+    "test": {
+      "images": 330,
+      "empty_images": 0,
+      "mean_boxes_per_image": 2.17,
+      "instances": {
+        "bad apple": 88,
+        "bad banana": 105,
+        "bad orange": 124,
+        "good apple": 73,
+        "good banana": 184,
+        "good orange": 141
+      },
+      "images_with_class": {
+        "bad apple": 63,
+        "bad banana": 63,
+        "bad orange": 56,
+        "good apple": 54,
+        "good banana": 64,
+        "good orange": 60
+      },
+      "median_box_area": {
+        "bad apple": 0.2282,
+        "bad banana": 0.1779,
+        "bad orange": 0.1102,
+        "good apple": 0.1714,
+        "good banana": 0.2349,
+        "good orange": 0.0709
+      },
+      "size_buckets": {
+        "bad apple": {
+          "medium": 28,
+          "large": 60
+        },
+        "bad banana": {
+          "medium": 21,
+          "large": 84
+        },
+        "bad orange": {
+          "small": 3,
+          "medium": 53,
+          "large": 68
+        },
+        "good apple": {
+          "large": 46,
+          "medium": 27
+        },
+        "good banana": {
+          "large": 149,
+          "medium": 35
+        },
+        "good orange": {
+          "medium": 85,
+          "large": 55,
+          "small": 1
+        }
+      }
+    }
+  }
+}

@@ -92,23 +92,34 @@ def train(data_yaml: Path) -> dict:
     return info
 
 
-def plot_cost_curve(sweep: pd.DataFrame, best_t: float) -> None:
+def plot_cost_curve(sweep: pd.DataFrame, robust: dict) -> None:
     """Static cost-vs-threshold chart for the report; the app draws a live one."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    fig, ax = plt.subplots(figsize=(8, 4.5))
-    ax.plot(sweep["threshold"], sweep["cost_per_1000"], lw=2.5, label="central: FN €10, base rate 5%")
-    for col, label in (("cost_fn_A", "FN €1.5 (A)"), ("cost_fn_C", "FN €20 (C)"),
-                       ("cost_base_0.02", "base rate 2%"), ("cost_base_0.15", "base rate 15%")):
-        ax.plot(sweep["threshold"], sweep[col], lw=1, ls="--", label=label)
-    best_cost = sweep.loc[sweep["threshold"] == best_t, "cost_per_1000"].iloc[0]
-    ax.scatter([best_t], [best_cost], color="red", zorder=5, label=f"chosen t = {best_t:.2f}")
-    ax.set_xlabel("rot-score threshold (discard if score ≥ threshold)")
-    ax.set_ylabel("expected cost, € per 1,000 fruits")
-    ax.legend(fontsize=8)
-    ax.grid(alpha=0.3)
+    fig, axes = plt.subplots(1, 2, figsize=(13, 4.8))
+    low, high = robust["tied_range"]
+    for ax, zoomed in zip(axes, (False, True)):
+        ax.plot(sweep["threshold"], sweep["cost_per_1000"], lw=2.5, label="central: FN €10, base rate 5%")
+        for col, label in (("cost_fn_A", "FN €1.5 (A)"), ("cost_fn_C", "FN €20 (C)"),
+                           ("cost_base_0.02", "base rate 2%"), ("cost_base_0.15", "base rate 15%")):
+            ax.plot(sweep["threshold"], sweep[col], lw=1, ls="--", label=label)
+        ax.axvspan(low, high, color="red", alpha=0.08, label=f"stable region {low:.2f}–{high:.2f}")
+        ax.scatter([robust["literal_minimum"]], [robust["literal_minimum_cost"]], color="grey", marker="x",
+                   zorder=5, label=f"literal minimum t = {robust['literal_minimum']:.3f}")
+        ax.scatter([robust["threshold"]], [robust["cost_per_1000"]], color="red", zorder=6,
+                   label=f"chosen t = {robust['threshold']:.2f}")
+        ax.set_xlabel("rot-score threshold (discard if score ≥ threshold)")
+        ax.set_ylabel("expected cost, € per 1,000 fruits")
+        ax.grid(alpha=0.3)
+        if zoomed:
+            ax.set_xlim(0, 0.5)
+            ax.set_ylim(0, 4 * robust["worst_cost_in_window"])
+            ax.set_title("zoom on the low-cost region")
+        else:
+            ax.set_title("full sweep")
+            ax.legend(fontsize=8)
     fig.tight_layout()
     fig.savefig(OUTPUTS_DIR / "cost_curve.png", dpi=150)
     plt.close(fig)
@@ -284,9 +295,11 @@ def main() -> None:
 
     sweep = cost_sweep_table(fruits)
     sweep.to_csv(OUTPUTS_DIR / "cost_sweep.csv", index=False)
-    best_t = float(sweep.loc[sweep["cost_per_1000"].idxmin(), "threshold"])
-    plot_cost_curve(sweep, best_t)
-    scenario_minima = {col: float(sweep.loc[sweep[col].idxmin(), "threshold"])
+    robust = costs.robust_threshold(sweep["cost_per_1000"].to_numpy())
+    best_t = robust["threshold"]
+    plot_cost_curve(sweep, robust)
+    scenario_minima = {col: {"robust": costs.robust_threshold(sweep[col].to_numpy())["threshold"],
+                             "literal": float(sweep.loc[sweep[col].idxmin(), "threshold"])}
                        for col in sweep.columns if col.startswith("cost_")}
 
     bands = []
@@ -301,7 +314,7 @@ def main() -> None:
     alternatives = {
         "do nothing (pack everything)": costs.BASE_RATE * costs.COST_FN * 1000,
         "person checks everything": costs.COST_REVIEW * 1000,
-        "model alone": float(sweep["cost_per_1000"].min()),
+        "model alone": robust["cost_per_1000"],
         "model + review band": chosen_band["cost_per_1000"],
     }
 
@@ -321,7 +334,7 @@ def main() -> None:
     operating_point = {
         "costs": {"fp": costs.COST_FP, "fn": costs.COST_FN, "tp": costs.COST_TP, "tn": costs.COST_TN,
                   "review": costs.COST_REVIEW, "base_rate": costs.BASE_RATE},
-        "single_threshold": decision_summary(fruits, best_t),
+        "single_threshold": {**decision_summary(fruits, best_t), "selection": robust},
         "scenario_minima": scenario_minima,
         "review_band": chosen_band,
         "alternatives_cost_per_1000": alternatives,
@@ -334,7 +347,8 @@ def main() -> None:
         d = b["decision_at_0.5"]
         print(f"{b['model']:<24} mAP50 {b['map50']:.3f}  mAP50-95 {b['map50_95']:.3f}  "
               f"rotten recall@0.5 {d['rotten_recall']:.3f}  min cost/1000 EUR {b['min_cost_per_1000']:.1f}")
-    print(f"\nCheapest single threshold: {best_t:.2f} -> EUR {sweep['cost_per_1000'].min():.1f} per 1,000 fruits")
+    print(f"\nChosen threshold (robust): {best_t:.2f} -> EUR {robust['cost_per_1000']:.2f} per 1,000 fruits; "
+          f"literal minimum {robust['literal_minimum']:.3f} -> EUR {robust['literal_minimum_cost']:.2f}")
     print(f"Review band (cap {CHOSEN_REVIEW_CAP:.0%}): {chosen_band}")
     print(f"Alternatives per 1,000: {alternatives}")
 

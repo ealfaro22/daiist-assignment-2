@@ -1,0 +1,101 @@
+{
+  "costs": {
+    "fp": 0.18,
+    "fn": 10.0,
+    "tp": 0.0,
+    "tn": 0.0,
+    "review": 0.016666666666666666,
+    "base_rate": 0.05
+  },
+  "single_threshold": {
+    "threshold": 0.17,
+    "TP": 315,
+    "FN": 2,
+    "FP": 4,
+    "TN": 394,
+    "rotten_recall": 0.9936908517350158,
+    "rotten_precision": 0.987460815047022,
+    "cost_per_1000": 4.873167097316234,
+    "per_fruit": {
+      "apple": {
+        "rotten_recall": 1.0,
+        "rotten_precision": 0.967032967032967,
+        "n_rotten": 88,
+        "n_good": 73
+      },
+      "banana": {
+        "rotten_recall": 0.9809523809523809,
+        "rotten_precision": 0.9903846153846154,
+        "n_rotten": 105,
+        "n_good": 184
+      },
+      "orange": {
+        "rotten_recall": 1.0,
+        "rotten_precision": 1.0,
+        "n_rotten": 124,
+        "n_good": 141
+      }
+    },
+    "selection": {
+      "threshold": 0.17,
+      "cost_per_1000": 4.873167097316234,
+      "worst_cost_in_window": 4.873167097316234,
+      "window": 0.05,
+      "tied_range": [
+        0.12,
+        0.23
+      ],
+      "literal_minimum": 0.004,
+      "literal_minimum_cost": 4.155176513482237
+    }
+  },
+  "scenario_minima": {
+    "cost_per_1000": {
+      "robust": 0.17,
+      "literal": 0.004
+    },
+    "cost_fn_A": {
+      "robust": 0.17,
+      "literal": 0.54
+    },
+    "cost_fn_B": {
+      "robust": 0.17,
+      "literal": 0.004
+    },
+    "cost_fn_C": {
+      "robust": 0.17,
+      "literal": 0.004
+    },
+    "cost_base_0.02": {
+      "robust": 0.17,
+      "literal": 0.068
+    },
+    "cost_base_0.05": {
+      "robust": 0.17,
+      "literal": 0.004
+    },
+    "cost_base_0.10": {
+      "robust": 0.17,
+      "literal": 0.004
+    },
+    "cost_base_0.15": {
+      "robust": 0.17,
+      "literal": 0.004
+    }
+  },
+  "review_band": {
+    "t_low": 0.18,
+    "t_high": 0.84,
+    "cost_per_1000": 3.3767945933664123,
+    "worst_cost_in_window": 3.476689440895329,
+    "review_share": 0.013333227652457915,
+    "review_cap": 0.1,
+    "reviewers_needed": 0.7618987229975952
+  },
+  "alternatives_cost_per_1000": {
+    "do nothing (pack everything)": 500.0,
+    "person checks everything": 16.666666666666668,
+    "model alone": 4.873167097316234,
+    "model + review band": 3.3767945933664123
+  }
+}

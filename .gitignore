@@ -17,3 +17,6 @@ runs/
 
 # Pretrained checkpoints Ultralytics downloads at train time
 /yolo11*.pt
+
+# Colab download, unpacked into weights/ and outputs/
+results.zip

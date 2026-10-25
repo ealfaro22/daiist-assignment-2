@@ -30,6 +30,7 @@ FRUITS = pd.read_csv(OUTPUTS_DIR / "test_scores.csv")
 SWEEP = pd.read_csv(OUTPUTS_DIR / "cost_sweep.csv")
 
 CHOSEN_T = OPERATING_POINT["single_threshold"]["threshold"]
+SELECTION = OPERATING_POINT["single_threshold"]["selection"]
 CHOSEN_BAND = OPERATING_POINT["review_band"]
 GROUP_IOU = 0.5        # boxes overlapping this much are the same fruit, as in train.py
 MIN_SHOW_CONF = 0.05   # hide boxes too weak to matter for any threshold setting
@@ -130,6 +131,9 @@ def cost_curve(t_low, t_high, base_rate, cost_fn):
     fig.add_trace(go.Scatter(x=[CHOSEN_T], y=[chosen_cost], mode="markers+text", name="chosen threshold",
                              marker=dict(size=12, color="#d62728"), text=[f"t={CHOSEN_T:.2f}"],
                              textposition="top center"))
+    fig.add_trace(go.Scatter(x=[SELECTION["literal_minimum"]], y=[SELECTION["literal_minimum_cost"]],
+                             mode="markers", name="literal minimum (fragile)",
+                             marker=dict(size=10, color="grey", symbol="x")))
     fig.add_vrect(x0=t_low, x1=t_high, fillcolor="#f0b400", opacity=0.15, line_width=0,
                   annotation_text="review band", annotation_position="top left")
     fig.update_layout(xaxis_title="rot-score threshold (discard if score ≥ threshold)",
@@ -217,7 +221,9 @@ with gr.Blocks(title="Rotten fruit sorter") as demo:
         f"Positive class = **rotten**. Costs: false negative (rotten packed) €{costs.COST_FN:.2f}, "
         f"false positive (good discarded) €{costs.COST_FP:.2f}, review €{costs.COST_REVIEW:.3f}/fruit. "
         f"Base rate {costs.BASE_RATE:.0%}. Chosen single threshold **{CHOSEN_T:.2f}**; "
-        f"chosen review band **{CHOSEN_BAND['t_low']:.2f}–{CHOSEN_BAND['t_high']:.2f}**."
+        f"chosen review band **{CHOSEN_BAND['t_low']:.2f}–{CHOSEN_BAND['t_high']:.2f}**. "
+        f"Thresholds are picked by the lowest worst-case cost within ±{SELECTION['window']:.2f}, "
+        f"not the literal minimum ({SELECTION['literal_minimum']:.3f}), which hinges on a single fruit."
     )
     with gr.Row():
         t_low = gr.Slider(0, 1, value=CHOSEN_BAND["t_low"], step=0.002,

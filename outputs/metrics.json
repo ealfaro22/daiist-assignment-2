@@ -1,0 +1,323 @@
+{
+  "positive_class": "rotten (any 'bad *' class)",
+  "training": {
+    "base_model": "yolo11n.pt",
+    "epochs_requested": 50,
+    "epochs_run": 50,
+    "best_epoch": 50,
+    "imgsz": 640,
+    "batch": 16,
+    "patience": 15,
+    "seed": 0,
+    "device": "Tesla T4",
+    "seconds": 1678,
+    "ultralytics": "8.4.189",
+    "torch": "2.11.0+cu130"
+  },
+  "finetuned_ultralytics_test": {
+    "map50": 0.9931314302675901,
+    "map50_95": 0.9069661761585847,
+    "precision": 0.9943190754205914,
+    "recall": 0.9860645856025322,
+    "per_class": {
+      "bad apple": {
+        "precision": 0.9948591911778512,
+        "recall": 1.0,
+        "ap50": 0.995,
+        "ap50_95": 0.907647862964718
+      },
+      "bad banana": {
+        "precision": 0.989881995725664,
+        "recall": 0.9317630717180247,
+        "ap50": 0.9868312895670959,
+        "ap50_95": 0.8854655852800792
+      },
+      "bad orange": {
+        "precision": 0.9974381452088614,
+        "recall": 1.0,
+        "ap50": 0.995,
+        "ap50_95": 0.907073919868487
+      },
+      "good apple": {
+        "precision": 1.0,
+        "recall": 0.9994950414403804,
+        "ap50": 0.995,
+        "ap50_95": 0.9500507968780572
+      },
+      "good banana": {
+        "precision": 0.9837351204111718,
+        "recall": 0.9861295268048723,
+        "ap50": 0.9919572920384444,
+        "ap50_95": 0.892124618336797
+      },
+      "good orange": {
+        "precision": 1.0,
+        "recall": 0.998999873651916,
+        "ap50": 0.995,
+        "ap50_95": 0.8994342736233694
+      }
+    },
+    "confusion_matrix": [
+      [
+        81,
+        0,
+        0,
+        5,
+        0,
+        0,
+        28
+      ],
+      [
+        1,
+        102,
+        0,
+        0,
+        3,
+        0,
+        872
+      ],
+      [
+        0,
+        0,
+        117,
+        1,
+        0,
+        12,
+        32
+      ],
+      [
+        4,
+        0,
+        0,
+        65,
+        0,
+        1,
+        29
+      ],
+      [
+        0,
+        2,
+        0,
+        0,
+        181,
+        0,
+        132
+      ],
+      [
+        2,
+        0,
+        7,
+        2,
+        0,
+        128,
+        45
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "confusion_labels": [
+      "bad apple",
+      "bad banana",
+      "bad orange",
+      "good apple",
+      "good banana",
+      "good orange",
+      "background"
+    ]
+  },
+  "baselines": [
+    {
+      "model": "yolo11n finetuned",
+      "map50": 0.9932739414145052,
+      "map50_95": 0.901859160483371,
+      "decision_at_0.5": {
+        "threshold": 0.5,
+        "TP": 311,
+        "FN": 6,
+        "FP": 2,
+        "TN": 396,
+        "rotten_recall": 0.9810725552050473,
+        "rotten_precision": 0.9936102236421726,
+        "cost_per_1000": 10.323018879888402,
+        "per_fruit": {
+          "apple": {
+            "rotten_recall": 1.0,
+            "rotten_precision": 0.9887640449438202,
+            "n_rotten": 88,
+            "n_good": 73
+          },
+          "banana": {
+            "rotten_recall": 0.9428571428571428,
+            "rotten_precision": 0.99,
+            "n_rotten": 105,
+            "n_good": 184
+          },
+          "orange": {
+            "rotten_recall": 1.0,
+            "rotten_precision": 1.0,
+            "n_rotten": 124,
+            "n_good": 141
+          }
+        }
+      },
+      "min_cost_per_1000": 4.155176513482237,
+      "per_class": {
+        "bad apple": {
+          "ap50": 0.995,
+          "ap50_95": 0.9082030418149
+        },
+        "bad banana": {
+          "ap50": 0.9854345794392524,
+          "ap50_95": 0.8797151232396601
+        },
+        "bad orange": {
+          "ap50": 0.995,
+          "ap50_95": 0.8991094164997107
+        },
+        "good apple": {
+          "ap50": 0.9948648648648649,
+          "ap50_95": 0.9419243946126057
+        },
+        "good banana": {
+          "ap50": 0.9943442041829138,
+          "ap50_95": 0.8837598531617333
+        },
+        "good orange": {
+          "ap50": 0.995,
+          "ap50_95": 0.8984431335716158
+        }
+      }
+    },
+    {
+      "model": "yolo11n COCO zero-shot",
+      "map50": 0.17170279767460742,
+      "map50_95": 0.12293337430502194,
+      "decision_at_0.5": {
+        "threshold": 0.5,
+        "TP": 0,
+        "FN": 317,
+        "FP": 0,
+        "TN": 398,
+        "rotten_recall": 0.0,
+        "rotten_precision": 0.0,
+        "cost_per_1000": 500.0,
+        "per_fruit": {
+          "apple": {
+            "rotten_recall": 0.0,
+            "rotten_precision": 0.0,
+            "n_rotten": 88,
+            "n_good": 73
+          },
+          "banana": {
+            "rotten_recall": 0.0,
+            "rotten_precision": 0.0,
+            "n_rotten": 105,
+            "n_good": 184
+          },
+          "orange": {
+            "rotten_recall": 0.0,
+            "rotten_precision": 0.0,
+            "n_rotten": 124,
+            "n_good": 141
+          }
+        }
+      },
+      "min_cost_per_1000": 171.0,
+      "per_class": {
+        "bad apple": {
+          "ap50": 0.0,
+          "ap50_95": 0.0
+        },
+        "bad banana": {
+          "ap50": 0.0,
+          "ap50_95": 0.0
+        },
+        "bad orange": {
+          "ap50": 0.0,
+          "ap50_95": 0.0
+        },
+        "good apple": {
+          "ap50": 0.2581432596260077,
+          "ap50_95": 0.22124047599404753
+        },
+        "good banana": {
+          "ap50": 0.3142458863483892,
+          "ap50_95": 0.15663222944976218
+        },
+        "good orange": {
+          "ap50": 0.4578276400732476,
+          "ap50_95": 0.3597275403863219
+        }
+      }
+    },
+    {
+      "model": "predict nothing",
+      "map50": 0.0,
+      "map50_95": 0.0,
+      "decision_at_0.5": {
+        "threshold": 0.5,
+        "TP": 0,
+        "FN": 317,
+        "FP": 0,
+        "TN": 398,
+        "rotten_recall": 0.0,
+        "rotten_precision": 0.0,
+        "cost_per_1000": 500.0,
+        "per_fruit": {
+          "apple": {
+            "rotten_recall": 0.0,
+            "rotten_precision": 0.0,
+            "n_rotten": 88,
+            "n_good": 73
+          },
+          "banana": {
+            "rotten_recall": 0.0,
+            "rotten_precision": 0.0,
+            "n_rotten": 105,
+            "n_good": 184
+          },
+          "orange": {
+            "rotten_recall": 0.0,
+            "rotten_precision": 0.0,
+            "n_rotten": 124,
+            "n_good": 141
+          }
+        }
+      },
+      "min_cost_per_1000": 171.0,
+      "per_class": {
+        "bad apple": {
+          "ap50": 0.0,
+          "ap50_95": 0.0
+        },
+        "bad banana": {
+          "ap50": 0.0,
+          "ap50_95": 0.0
+        },
+        "bad orange": {
+          "ap50": 0.0,
+          "ap50_95": 0.0
+        },
+        "good apple": {
+          "ap50": 0.0,
+          "ap50_95": 0.0
+        },
+        "good banana": {
+          "ap50": 0.0,
+          "ap50_95": 0.0
+        },
+        "good orange": {
+          "ap50": 0.0,
+          "ap50_95": 0.0
+        }
+      }
+    }
+  ]
+}
