@@ -142,31 +142,34 @@ def cost_curve(t_low, t_high, base_rate, cost_fn):
     return fig
 
 
-def update_operating(t_low, t_high, base_rate, cost_fn):
+def update_operating(t_low, t_high, base_rate, cost_fn, reviewer_error):
     t_low, t_high = min(t_low, t_high), max(t_low, t_high)
     rates = costs.outcome_rates(FRUITS["rot_score"], FRUITS["is_rotten"], t_low, t_high)
-    cost = costs.cost_per_1000(rates, base_rate, cost_fn)
+    cost = costs.cost_per_1000(rates, base_rate, cost_fn, reviewer_error=reviewer_error)
     share = costs.review_share(rates, base_rate)
+    c = costs.per_1000(rates, base_rate)
     alternatives = pd.DataFrame({
         "option": ["do nothing (pack everything)", "person checks everything",
                    f"model alone at t={CHOSEN_T:.2f}", "current band"],
         "€ per 1,000 fruits": [
             base_rate * cost_fn * 1000,
-            costs.COST_REVIEW * 1000,
+            costs.cost_per_1000(costs.everything_reviewed(), base_rate, cost_fn, reviewer_error=reviewer_error),
             costs.cost_per_1000(costs.outcome_rates(FRUITS["rot_score"], FRUITS["is_rotten"],
                                                     CHOSEN_T, CHOSEN_T), base_rate, cost_fn),
             cost,
         ],
     }).round(2)
+    rotten_packed = c["FN"] + reviewer_error * c["review_rotten"]
+    good_discarded = c["FP"] + reviewer_error * c["review_good"]
     summary = (
         f"### € {cost:,.2f} per 1,000 fruits\n"
         f"- Sent to a person: **{share:.1%}** of fruit → "
         f"{costs.FRUITS_PER_DAY * share:,.0f} fruits/day → "
         f"**{costs.reviewers_needed(share):.1f} reviewers** "
         f"(at {costs.REVIEW_SECONDS:.0f} s each, {costs.REVIEWER_HOURS_PER_DAY:.0f} productive h/day)\n"
-        f"- Rotten fruit packed: {base_rate * rates['rotten']['pass'] * 1000:.2f} per 1,000 "
-        f"(rotten recall incl. review {1 - rates['rotten']['pass']:.1%})\n"
-        f"- Good fruit discarded: {(1 - base_rate) * rates['good']['fail'] * 1000:.1f} per 1,000"
+        f"- Rotten fruit packed: {rotten_packed:.2f} per 1,000, of which "
+        f"{reviewer_error * c['review_rotten']:.2f} are reviewer mistakes\n"
+        f"- Good fruit discarded: {good_discarded:.1f} per 1,000"
     )
     return summary, outcome_table(rates, base_rate), alternatives, cost_curve(t_low, t_high, base_rate, cost_fn)
 
@@ -219,7 +222,8 @@ with gr.Blocks(title="Rotten fruit sorter") as demo:
     gr.Markdown(
         "# Rotten fruit sorter: packing-line decision support\n"
         f"Positive class = **rotten**. Costs: false negative (rotten packed) €{costs.COST_FN:.2f}, "
-        f"false positive (good discarded) €{costs.COST_FP:.2f}, review €{costs.COST_REVIEW:.3f}/fruit. "
+        f"false positive (good discarded) €{costs.COST_FP:.2f}, review €{costs.COST_REVIEW:.3f}/fruit "
+        f"({costs.REVIEW_SECONDS:.0f} s, reviewer wrong {costs.REVIEWER_ERROR:.0%} of the time). "
         f"Base rate {costs.BASE_RATE:.0%}. Chosen single threshold **{CHOSEN_T:.2f}**; "
         f"chosen review band **{CHOSEN_BAND['t_low']:.2f}–{CHOSEN_BAND['t_high']:.2f}**. "
         f"Thresholds are picked by the lowest worst-case cost within ±{SELECTION['window']:.2f}, "
@@ -235,6 +239,8 @@ with gr.Blocks(title="Rotten fruit sorter") as demo:
         with gr.Row():
             base_rate = gr.Slider(0.01, 0.20, value=costs.BASE_RATE, step=0.01, label="Base rate (share rotten)")
             cost_fn = gr.Slider(0.5, 30, value=costs.COST_FN, step=0.5, label="False-negative cost (€)")
+            reviewer_error = gr.Slider(0, 0.20, value=costs.REVIEWER_ERROR, step=0.01,
+                                       label="Reviewer error rate (share of reviewed fruit decided wrongly)")
         summary = gr.Markdown()
         with gr.Row():
             outcomes = gr.Dataframe(label="Confusion matrix with review, per 1,000 fruits at this base rate")
@@ -259,7 +265,7 @@ with gr.Blocks(title="Rotten fruit sorter") as demo:
         gr.Markdown(f"Roboflow `{DATASET_STATS['source']}`: instances per class and split.")
         gr.Dataframe(dataset_table())
 
-    operating_inputs = [t_low, t_high, base_rate, cost_fn]
+    operating_inputs = [t_low, t_high, base_rate, cost_fn, reviewer_error]
     operating_outputs = [summary, outcomes, alternatives, curve]
     for control in operating_inputs:
         control.change(update_operating, operating_inputs, operating_outputs)

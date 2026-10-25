@@ -313,7 +313,7 @@ def main() -> None:
 
     alternatives = {
         "do nothing (pack everything)": costs.BASE_RATE * costs.COST_FN * 1000,
-        "person checks everything": costs.COST_REVIEW * 1000,
+        "person checks everything": costs.cost_per_1000(costs.everything_reviewed()),
         "model alone": robust["cost_per_1000"],
         "model + review band": chosen_band["cost_per_1000"],
     }
@@ -333,7 +333,8 @@ def main() -> None:
     }
     operating_point = {
         "costs": {"fp": costs.COST_FP, "fn": costs.COST_FN, "tp": costs.COST_TP, "tn": costs.COST_TN,
-                  "review": costs.COST_REVIEW, "base_rate": costs.BASE_RATE},
+                  "review": costs.COST_REVIEW, "review_seconds": costs.REVIEW_SECONDS,
+                  "reviewer_error": costs.REVIEWER_ERROR, "base_rate": costs.BASE_RATE},
         "single_threshold": {**decision_summary(fruits, best_t), "selection": robust},
         "scenario_minima": scenario_minima,
         "review_band": chosen_band,

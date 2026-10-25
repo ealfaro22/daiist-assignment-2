@@ -9,7 +9,8 @@ Each fruit has a rot score in [0, 1]. Two thresholds split it three ways:
     score >= t_high           -> fail   (discarded)
 
 With t_low == t_high there is no review band and the model decides alone.
-The reviewer is assumed to always decide correctly.
+The reviewer gets REVIEWER_ERROR of the reviewed fruit wrong: a rotten one
+packed costs like a false negative, a good one discarded like a false positive.
 
 Rates are measured per true class on the test split and then re-weighted to
 the production base rate, because the test split is ~44% rotten while the
@@ -28,6 +29,7 @@ BASE_RATE = 0.05      # share of fruit on the line that is rotten
 REVIEWER_EUR_PER_HOUR = 12.0
 REVIEW_SECONDS = 5.0
 COST_REVIEW = REVIEWER_EUR_PER_HOUR * REVIEW_SECONDS / 3600
+REVIEWER_ERROR = 0.05              # fatigue and distraction, on the hardest fruit
 
 FRUITS_PER_DAY = 288_000           # ~10 fruits/s over an 8 h shift
 REVIEWER_HOURS_PER_DAY = 7.0       # productive hours in an 8 h shift
@@ -68,10 +70,19 @@ def per_1000(rates: dict, base_rate: float = BASE_RATE) -> dict:
 
 
 def cost_per_1000(rates: dict, base_rate: float = BASE_RATE, cost_fn: float = COST_FN,
-                  cost_fp: float = COST_FP, cost_review: float = COST_REVIEW) -> float:
+                  cost_fp: float = COST_FP, cost_review: float = COST_REVIEW,
+                  reviewer_error: float = REVIEWER_ERROR) -> float:
     c = per_1000(rates, base_rate)
+    reviewed = c["review_rotten"] + c["review_good"]
+    reviewer_mistakes = reviewer_error * (c["review_rotten"] * cost_fn + c["review_good"] * cost_fp)
     return (c["TP"] * COST_TP + c["FN"] * cost_fn + c["FP"] * cost_fp + c["TN"] * COST_TN
-            + (c["review_rotten"] + c["review_good"]) * cost_review)
+            + reviewed * cost_review + reviewer_mistakes)
+
+
+def everything_reviewed() -> dict:
+    """Outcome rates when a person checks every fruit (no model)."""
+    all_review = {"pass": 0.0, "review": 1.0, "fail": 0.0}
+    return {"rotten": dict(all_review), "good": dict(all_review)}
 
 
 def review_share(rates: dict, base_rate: float = BASE_RATE) -> float:

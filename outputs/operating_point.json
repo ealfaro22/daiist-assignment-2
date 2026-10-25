@@ -5,6 +5,8 @@
     "tp": 0.0,
     "tn": 0.0,
     "review": 0.016666666666666666,
+    "review_seconds": 5.0,
+    "reviewer_error": 0.05,
     "base_rate": 0.05
   },
   "single_threshold": {
@@ -15,7 +17,7 @@
     "TN": 394,
     "rotten_recall": 0.9936908517350158,
     "rotten_precision": 0.987460815047022,
-    "cost_per_1000": 4.873167097316234,
+    "cost_per_1000": 4.873167097316233,
     "per_fruit": {
       "apple": {
         "rotten_recall": 1.0,
@@ -38,15 +40,15 @@
     },
     "selection": {
       "threshold": 0.17,
-      "cost_per_1000": 4.873167097316234,
-      "worst_cost_in_window": 4.873167097316234,
+      "cost_per_1000": 4.873167097316233,
+      "worst_cost_in_window": 4.873167097316233,
       "window": 0.05,
       "tied_range": [
         0.12,
         0.23
       ],
       "literal_minimum": 0.004,
-      "literal_minimum_cost": 4.155176513482237
+      "literal_minimum_cost": 4.155176513482236
     }
   },
   "scenario_minima": {
@@ -85,17 +87,17 @@
   },
   "review_band": {
     "t_low": 0.18,
-    "t_high": 0.84,
-    "cost_per_1000": 3.3767945933664123,
-    "worst_cost_in_window": 3.476689440895329,
-    "review_share": 0.013333227652457915,
+    "t_high": 0.59,
+    "cost_per_1000": 4.256975334083668,
+    "worst_cost_in_window": 4.256975334083668,
+    "review_share": 0.008107176259848218,
     "review_cap": 0.1,
-    "reviewers_needed": 0.7618987229975952
+    "reviewers_needed": 0.46326721484846967
   },
   "alternatives_cost_per_1000": {
     "do nothing (pack everything)": 500.0,
-    "person checks everything": 16.666666666666668,
-    "model alone": 4.873167097316234,
-    "model + review band": 3.3767945933664123
+    "person checks everything": 50.21666666666667,
+    "model alone": 4.873167097316233,
+    "model + review band": 4.256975334083668
   }
 }
